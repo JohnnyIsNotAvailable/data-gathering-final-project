@@ -50,7 +50,38 @@ def parse_global_metrics(raw_response):
         'derivatives_24h_percentage_change': quote_data.get('derivatives_24h_percentage_change'),
     }
 
+def clean_data(raw_data_list):
+    if not raw_data_list:
+        return pd.DataFrame()
 
+    parsed_records = []
+    for raw_response in raw_data_list:
+        record = parse_global_metrics(raw_response)
+        if record:
+            parsed_records.append(record)
+
+    if not parsed_records:
+        return pd.DataFrame()
+
+    df = pd.DataFrame(parsed_records)
+
+    if 'timestamp' in df.columns:
+        df['timestamp'] = pd.to_datetime(df['timestamp'])
+
+    df = df.dropna(subset=['timestamp', 'total_market_cap'])
+
+    df = df.drop_duplicates(subset=['timestamp'])
+
+    numeric_cols = ['total_market_cap', 'total_volume_24h', 'defi_market_cap',
+                    'stablecoin_market_cap', 'derivatives_volume_24h']
+    for col in numeric_cols:
+        if col in df.columns:
+            df[col] = df[col].clip(lower=0)
+
+    df['btc_dominance'] = df['btc_dominance'].ffill().fillna(0)
+    df['eth_dominance'] = df['eth_dominance'].ffill().fillna(0)
+
+    return df
 
 def save_to_database(df):
     if df.empty:
