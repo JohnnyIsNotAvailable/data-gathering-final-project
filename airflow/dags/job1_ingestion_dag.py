@@ -16,28 +16,27 @@ default_args = {
     'depends_on_past': False,
     'email_on_failure': False,
     'email_on_retry': False,
-    'retries': 2,
-    'retry_delay': timedelta(minutes=10),
+    'retries': 1,
+    'retry_delay': timedelta(minutes=5),
 }
 
 
-def run_daily_analytics(**context):
-    from job3_analytics import run_analytics
-    execution_date = context['execution_date'].date()
-    run_analytics(target_date=execution_date)
+def run_ingestion_task(**context):
+    from job1_producer import run_producer
+    run_producer(duration_seconds=240)
 
 
 with DAG(
-    dag_id='job3_daily_summary',
+    dag_id='job1_ingestion',
     default_args=default_args,
-    description='Daily analytics job: SQLite events -> aggregations -> summary table',
-    schedule='@daily',
+    description='Continuous data ingestion from API to Kafka',
+    schedule=timedelta(minutes=5),
     start_date=datetime(2024, 1, 1),
     catchup=False,
-    tags=['analytics', 'sqlite', 'daily', 'batch'],
+    tags=['ingestion', 'kafka', 'api'],
 ) as dag:
 
-    analytics_task = PythonOperator(
-        task_id='compute_daily_summary',
-        python_callable=run_daily_analytics,
+    ingestion_task = PythonOperator(
+        task_id='fetch_and_produce',
+        python_callable=run_ingestion_task,
     )
