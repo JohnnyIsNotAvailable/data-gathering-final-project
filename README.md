@@ -64,3 +64,6 @@ pip install -r requirements.txt
 ```
 
 Requires Kafka and Airflow to be running. Set `CMC_API_KEY` environment variable with your CoinMarketCap API key.
+
+## Command to run job3 for today
+docker-compose exec airflow airflow tasks clear job3_daily_summary -e "2025-12-18" -y

@@ -40,7 +40,7 @@ def compute_analytics(df, target_date=None):
             btc_dominance_change = last_btc - first_btc
 
     analytics = {
-        'date': target_date,
+        'date': str(target_date),
         'total_records': len(df),
         'avg_total_market_cap': df['total_market_cap'].mean(),
         'min_total_market_cap': df['total_market_cap'].min(),
