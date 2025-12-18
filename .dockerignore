@@ -1,0 +1,10 @@
+.git
+.gitignore
+*.md
+__pycache__
+*.pyc
+.env
+data/
+logs/
+report/
+.DS_Store
